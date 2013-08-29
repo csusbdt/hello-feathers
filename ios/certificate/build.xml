@@ -1,0 +1,54 @@
+<project>
+
+  <description>
+  Generate a self-signed certificate to be used for signing the air package.
+  </description>
+
+  <!-- To not allow automatic overwrite of keystore file.
+       Regeneration of keystore may cause installation problems. -->
+  <available file="keystore" property="keystore-exists" />
+
+  <!--
+    The keystore target generates a self-signed certificate and
+    stores this in a file called _keystore_.
+	
+    Add the path to the keystore file to .gitignore to
+    avoid exposing to outside.
+	
+	After using a certificate on a system, it is problematic to use a different
+    certificate to update or reinstall an air package with the same application id,
+    because Adobe AIR will reject the new package if its certificate differs
+    an existing certificate.  These certificates can be cached in your system in
+    unexpected ways.  For example, in a mac environment, I observed Adobe AIR
+    searching through the trash folder to locate an air file with the given id 
+    and use the certificate from it.
+	
+    ADVICE: Don't regenerate the keystore after doing a test install.
+
+    NOTE: Android app certificates must be valid for at least 25 years.
+          http://help.adobe.com/en_US/air/build/WS901d38e593cd1bac25d3d8c712b2d86751e-8000.html
+  -->
+  <target name="keystore" 
+          unless="keystore-exists"
+          description="Generate keystore with self-signed certificate.">
+    <exec executable="adt" failonerror="true" os="Mac OS X"> 
+      <arg value="-certificate"      />
+      <arg line="-cn csusbdt"        />
+      <arg line="-validityPeriod 25" />
+      <arg value="2048-RSA"          />
+      <arg value="keystore"          />
+      <arg value="1234"              />
+    </exec> 
+	<exec executable="cmd" failonerror="true" os="Windows XP, Windows 7, Windows 8">
+      <arg value="/c"                />
+      <arg value="adt.bat"           />
+      <arg value="-certificate"      />
+      <arg line="-cn csusbdt"        />
+      <arg line="-validityPeriod 25" />
+      <arg value="2048-RSA"          />
+      <arg value="keystore"          />
+      <arg value="1234"              />
+    </exec> 
+  </target>
+
+</project>

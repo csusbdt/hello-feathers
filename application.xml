@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<application xmlns="http://ns.adobe.com/air/application/3.8">
+  <id>@app.id@</id>
+  <filename>@app.filename@</filename>
+  <name>Hello Feathers</name>
+  <versionNumber>@app.versionNumber@</versionNumber>
+  <description>Example Feathers/Starling application</description>
+  <copyright>2013 David Turner</copyright>
+
+  <initialWindow>
+    <content>Main.swf</content>
+    <autoOrients>true</autoOrients>
+    <fullScreen>true</fullScreen>
+    <visible>true</visible>
+    <renderMode>direct</renderMode>
+  </initialWindow>
+
+  <supportedLanguages>en</supportedLanguages>
+
+  <icon>
+    <image29x29>icons/icon29.png</image29x29>
+    <image48x48>icons/icon48.png</image48x48>
+    <image50x50>icons/icon50.png</image50x50>
+    <image57x57>icons/icon57.png</image57x57>
+    <image58x58>icons/icon58.png</image58x58>
+    <image72x72>icons/icon72.png</image72x72>
+    <image96x96>icons/icon96.png</image96x96>
+    <image100x100>icons/icon100.png</image100x100>
+    <image114x114>icons/icon114.png</image114x114>
+    <image128x128>icons/icon128.png</image128x128>
+    <image144x144>icons/icon144.png</image144x144>
+  </icon>
+
+  <android>
+    <colorDepth>16bit</colorDepth>
+    <manifestAdditions><![CDATA[
+      <manifest android:installLocation="auto">
+        <uses-permission android:name="android.permission.INTERNET"/>
+      </manifest>
+    ]]></manifestAdditions>
+  </android>
+
+  <iPhone>
+    <InfoAdditions><![CDATA[<key>UIDeviceFamily</key> 
+        <array> 
+          <string>1</string>
+          <string>2</string>
+        </array>
+        <key>UIPrerenderedIcon</key>
+        <true/>]]></InfoAdditions>
+    <requestedDisplayResolution>high</requestedDisplayResolution>
+  </iPhone>
+</application>
+

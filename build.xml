@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="hello-world" basedir="." default="build-android">
+
+  <!--
+    This build file is designed to work with AIR SDK 3.8.
+    To work with a different version, change properties
+    swf.version and player.version accordingly.
+
+    Create local.properties to set the following properties.
+
+      feathers.root      = 
+      starling.root      = 
+      theme.root         =
+      airsdk.root        =
+      app.versionNumber  = 
+  -->
+
+  <property file="local.properties" />
+
+  <fail unless="feathers.root"      />
+  <fail unless="starling.root"      />
+  <fail unless="theme.root"         />
+  <fail unless="airsdk.root"        />
+  <fail unless="app.versionNumber"  />
+  <fail unless="ios.provision.path" />
+
+  <property name="swf.version"        value="21"                                             />
+  <property name="player.version"     value="11.8"                                           />
+
+  <property name="flashplayer.config" value="${airsdk.root}/frameworks/flex-config.xml"      />
+  <property name="airdesktop.config"  value="${airsdk.root}/frameworks/air-config.xml"       />
+  <property name="airmobile.config"   value="${airsdk.root}/frameworks/airmobile-config.xml" />
+  <property name="asdoc"              value="${airsdk.root}/lib/legacy/asdoc.jar"            />
+  <property name="compc"              value="${airsdk.root}/lib/compc-cli.jar"               />
+  <property name="mxmlc"              value="${airsdk.root}/lib/mxmlc-cli.jar"               />
+  <property name="adt"                value="${airsdk.root}/lib/adt.jar"                     />
+
+  <property name="output.path"                  value="${basedir}/temp"                         />
+  <property name="icon.path"                    value="${basedir}/icons"                        />
+  <property name="ios.default.icon.path"        value="${basedir}/ios/default-icons"            />
+  <property name="ios.certificate.path"         value="${basedir}/ios/certificate/keystore"     />
+  <property name="ios.certificate.password"     value="1234"                                    />
+  <property name="android.certificate.path"     value="${basedir}/android/certificate/keystore" />
+  <property name="android.certificate.password" value="1234"                                    />
+  <property name="app.id"                       value="csusbdt.hello.feathers"                  />
+  <property name="app.filename"                 value="hello_feathers"                          />
+
+  <available file="android/certificate/keystore" property="android-keystore-exists" />
+  <available file="ios/certificate/keystore" property="ios-keystore-exists" />
+
+  <target name="clean">
+    <delete dir="${output.path}"/>
+<echo message="${icon.path}" />
+  </target>
+
+  <target name="build-web" depends="clean">
+    <echo message="Building MainWeb.swf" />
+    <java jar="${mxmlc}" fork="true" failonerror="true">
+      <arg value="-load-config=${flashplayer.config}" />
+      <arg value="-target-player=${player.version}" />
+      <arg value="-swf-version=${swf.version}" />
+      <arg value="-frame=two,app.App" />   <!-- what is this? -->
+      <arg value="-source-path+=src" />
+      <arg value="-source-path+=${starling.root}" />
+      <arg value="-source-path+=${feathers.root}" />
+      <arg value="-source-path+=${theme.root}" />
+      <arg value="src/MainWeb.as" />
+      <arg value="-output=${output.path}/MainWeb.swf" />
+    </java>
+    <copy file="${basedir}/web/index.html" todir="${output.path}" />
+  </target>
+
+  <target name="build-air-swf" depends="clean">
+    <echo message="Building Main.swf"/>
+    <java jar="${mxmlc}" fork="true" failonerror="true">
+      <arg line="-load-config=${airmobile.config}" />
+      <arg line="-target-player=${player.version}" />
+      <arg line="-swf-version=${swf.version}" />
+      <arg line="-debug" />
+      <arg line="-source-path+=src" />
+      <arg line="-source-path+=${starling.root}" />
+      <arg line="-source-path+=${feathers.root}" />
+      <arg line="-source-path+=${theme.root}" />
+      <arg line="src/Main.as" />
+      <arg line="-output=${output.path}/Main.swf" />
+    </java>
+  </target>
+
+  <target name="build-application">
+    <echo message="Building ${output.path}/application.xml." />
+    <filter token="app.id"            value="${app.id}"             />
+    <filter token="app.filename"      value="${app.filename}"       />
+    <filter token="app.versionNumber" value="${app.versionNumber}"  />
+    <copy file="application.xml" tofile="${output.path}/application.xml" filtering="true" overwrite="true" />
+<!--
+    <copy todir="${output.path}/icons">
+      <fileset dir="${icon.path}" />
+    </copy>
+-->
+  </target>
+
+  <target name="build-ios" depends="build-air-swf,build-application">
+<!--
+    <echo message="Creating application descriptor." />
+    <filter token="app.id"            value="${app.id}"     />
+    <filter token="app.filename"      value="${app.filename}"       />
+    <filter token="app.versionNumber" value="${app.versionNumber}"  />
+    <copy file="application.xml" tofile="${output.path}/application.xml" filtering="true" overwrite="true" />
+    <copy todir="${output.path}/icons">
+      <fileset dir="${icon.path}" />
+    </copy>
+-->
+    <echo message="Packaging Main.ipa" />
+    <java jar="${adt}" dir="${basedir}" fork="true" failonerror="true">
+      <arg line="-package" />
+      <!-- see http://help.adobe.com/en_US/air/build/WS901d38e593cd1bac35eb7b4e12cddc5fbbb-8000.html -->
+      <!--arg line="-target ipa-test" /--> <!-- for developer device  BAD-->
+      <arg line="-target ipa-test-interpreter" />  <!-- for developer device, fast compile GOOD-->
+      <!--arg line="-target ipa-test-interpreter-simulator" /-->  <!-- for emulator ???-->
+      <!--arg line="-target ipa-debug -connect ${ipaddr}" /-->  <!-- for developer device with trace output over wifi -->
+      <!--arg line="-target ipa-debug -listen 16000" /-->  <!-- for developer device with trace output over usb -->
+      <!--arg line="-target ipa-ad-hoc" /-->  <!-- to distribute to testers ???-->
+      <!--arg line="-target ipa-app-store" /--> <!-- for app store GOOD-->
+      <arg line="-provisioning-profile ${ios.provision.path}" />
+      <arg line="-keystore ${ios.certificate.path}" />
+      <arg line="-storetype pkcs12" />
+      <arg line="-storepass ${ios.certificate.password}" />
+      <arg line="${output.path}/${app.filename}.ipa" />
+      <arg line="${output.path}/application.xml" />
+      <arg line="-C ${basedir} icons"/>
+<!--
+      <arg line="-C ${icon.path}" />
+      <arg line="icon29.png icon48.png icon50.png icon57.png icon58.png icon72.png" />
+      <arg line="icon96.png icon100.png icon114.png icon128.png icon144.png" />
+-->
+      <arg line="-C ${output.path}" />
+      <arg line="Main.swf" />
+      <!--arg line="icons -C ${ios.default.icon.path}" /-->
+      <arg line="-C ${ios.default.icon.path}" />
+      <arg line="Default.png Default@2x.png Default-Portrait.png Default-Portrait@2x.png" />
+      <arg line="Default-Landscape.png Default-Landscape@2x.png Default-568h@2x.png" />
+    </java>
+  </target>
+
+  <target name="build-android" depends="build-air-swf,build-application">
+    <echo message="Packaging ${app.filename}.apk"/>
+    <fail unless="android-keystore-exists" />
+    <java jar="${adt}" dir="${basedir}" fork="true" failonerror="true">
+      <arg line="-package"/>
+      <arg line="-target apk-captive-runtime"/>
+      <arg line="-storetype pkcs12"/>
+      <arg line="-keystore"/>
+      <arg line="${android.certificate.path}"/>
+      <arg line="-storepass"/>
+      <arg line="${android.certificate.password}"/>
+      <arg line="${output.path}/${app.filename}.apk"/>
+      <arg line="${output.path}/application.xml" />
+      <arg line="-C ${basedir} icons"/>
+      <!--arg line="icon29.png icon48.png icon50.png icon57.png icon58.png icon72.png icon96.png icon100.png icon114.png icon128.png icon144.png"/-->
+      <arg line="-C"/>
+      <arg line="${output.path}"/>
+      <arg line="Main.swf"/>
+    </java>
+  </target>
+</project>
+
