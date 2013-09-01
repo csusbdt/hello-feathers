@@ -50,7 +50,6 @@
 
   <target name="clean">
     <delete dir="${output.path}"/>
-<echo message="${icon.path}" />
   </target>
 
   <target name="build-web" depends="clean">
@@ -76,7 +75,7 @@
       <arg line="-load-config=${airmobile.config}" />
       <arg line="-target-player=${player.version}" />
       <arg line="-swf-version=${swf.version}" />
-      <arg line="-debug" />
+      <arg line="-debug=true" />
       <arg line="-source-path+=src" />
       <arg line="-source-path+=${starling.root}" />
       <arg line="-source-path+=${feathers.root}" />
@@ -92,24 +91,9 @@
     <filter token="app.filename"      value="${app.filename}"       />
     <filter token="app.versionNumber" value="${app.versionNumber}"  />
     <copy file="application.xml" tofile="${output.path}/application.xml" filtering="true" overwrite="true" />
-<!--
-    <copy todir="${output.path}/icons">
-      <fileset dir="${icon.path}" />
-    </copy>
--->
   </target>
 
   <target name="build-ios" depends="build-air-swf,build-application">
-<!--
-    <echo message="Creating application descriptor." />
-    <filter token="app.id"            value="${app.id}"     />
-    <filter token="app.filename"      value="${app.filename}"       />
-    <filter token="app.versionNumber" value="${app.versionNumber}"  />
-    <copy file="application.xml" tofile="${output.path}/application.xml" filtering="true" overwrite="true" />
-    <copy todir="${output.path}/icons">
-      <fileset dir="${icon.path}" />
-    </copy>
--->
     <echo message="Packaging Main.ipa" />
     <java jar="${adt}" dir="${basedir}" fork="true" failonerror="true">
       <arg line="-package" />
@@ -128,14 +112,8 @@
       <arg line="${output.path}/${app.filename}.ipa" />
       <arg line="${output.path}/application.xml" />
       <arg line="-C ${basedir} icons"/>
-<!--
-      <arg line="-C ${icon.path}" />
-      <arg line="icon29.png icon48.png icon50.png icon57.png icon58.png icon72.png" />
-      <arg line="icon96.png icon100.png icon114.png icon128.png icon144.png" />
--->
       <arg line="-C ${output.path}" />
       <arg line="Main.swf" />
-      <!--arg line="icons -C ${ios.default.icon.path}" /-->
       <arg line="-C ${ios.default.icon.path}" />
       <arg line="Default.png Default@2x.png Default-Portrait.png Default-Portrait@2x.png" />
       <arg line="Default-Landscape.png Default-Landscape@2x.png Default-568h@2x.png" />
@@ -147,16 +125,16 @@
     <fail unless="android-keystore-exists" />
     <java jar="${adt}" dir="${basedir}" fork="true" failonerror="true">
       <arg line="-package"/>
-      <arg line="-target apk-captive-runtime"/>
-      <arg line="-storetype pkcs12"/>
-      <arg line="-keystore"/>
-      <arg line="${android.certificate.path}"/>
-      <arg line="-storepass"/>
-      <arg line="${android.certificate.password}"/>
-      <arg line="${output.path}/${app.filename}.apk"/>
+      <!--arg line="-target apk-captive-runtime" /--> <!-- PRODUCTION SETTING -->
+      <arg line="-target apk-debug" />  <!-- DEBUG SETTING -->
+      <arg line="-storetype pkcs12" />
+      <arg line="-keystore" />
+      <arg line="${android.certificate.path}" />
+      <arg line="-storepass" />
+      <arg line="${android.certificate.password}" />
+      <arg line="${output.path}/${app.filename}.apk" />
       <arg line="${output.path}/application.xml" />
-      <arg line="-C ${basedir} icons"/>
-      <!--arg line="icon29.png icon48.png icon50.png icon57.png icon58.png icon72.png icon96.png icon100.png icon114.png icon128.png icon144.png"/-->
+      <arg line="-C ${basedir} icons" />
       <arg line="-C"/>
       <arg line="${output.path}"/>
       <arg line="Main.swf"/>
